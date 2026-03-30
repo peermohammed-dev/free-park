@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParkFree - Smart Parking Management</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <span class="logo">🚗</span>
+                <h1>ParkFree</h1>
+            </div>
+            <div class="nav-links">
+                <button class="btn-secondary" onclick="showView('map')">Map View</button>
+                <button class="btn-primary" onclick="showView('add')">Add Spot</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container main-content">
+        <!-- Hero Section -->
+        <section id="hero-section" class="hero">
+            <div class="hero-content">
+                <h2 class="hero-title">Never Get a Parking Fine Again</h2>
+                <p class="hero-subtitle">Community-powered parking information. Find safe spots, report restrictions, help others avoid fines.</p>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-number" id="total-spots">0</span>
+                        <span class="stat-label">Parking Spots</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number" id="free-spots">0</span>
+                        <span class="stat-label">Free Spots</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number" id="contributors">0</span>
+                        <span class="stat-label">Contributors</span>
+                    </div>
+                </div>
+                <div class="hero-actions">
+                    <button class="btn-large btn-primary" onclick="showView('map')">Explore Map</button>
+                    <button class="btn-large btn-secondary" onclick="showView('add')">Add a Spot</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Map View -->
+        <section id="map-view" class="view-section" style="display: none;">
+            <div class="view-header">
+                <h2>Parking Locations</h2>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all" onclick="filterSpots('all')">All</button>
+                    <button class="filter-btn" data-filter="free" onclick="filterSpots('free')">Free Parking</button>
+                    <button class="filter-btn" data-filter="no-parking" onclick="filterSpots('no-parking')">No Parking</button>
+                    <button class="filter-btn" data-filter="paid" onclick="filterSpots('paid')">Paid</button>
+                </div>
+            </div>
+            <div id="map" class="map-container"></div>
+            <div class="spots-list" id="spots-list"></div>
+        </section>
+
+        <!-- Add Spot View -->
+        <section id="add-view" class="view-section" style="display: none;">
+            <div class="form-container">
+                <h2>Add Parking Spot</h2>
+                <p class="form-description">Help the community by reporting parking information in your area.</p>
+                
+                <form id="add-spot-form" onsubmit="addParkingSpot(event)">
+                    <div class="form-group">
+                        <label for="location">Location *</label>
+                        <div class="location-input-wrapper">
+                            <input type="text" id="location" required placeholder="e.g., 123 Main Street or click on map to select">
+                            <button type="button" class="btn-icon" onclick="openMapPicker()" title="Pick location on map">
+                                📍 Pick on Map
+                            </button>
+                        </div>
+                        <small>Enter address manually or click "Pick on Map" to select location visually</small>
+                    </div>
+                    
+                    <div class="form-group" id="coordinates-display" style="display: none;">
+                        <label>Selected Coordinates</label>
+                        <div class="coordinates-info">
+                            <span id="selected-lat">-</span>, <span id="selected-lng">-</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="parking-type">Parking Type *</label>
+                        <select id="parking-type" required>
+                            <option value="">Select type...</option>
+                            <option value="free">Free Parking</option>
+                            <option value="no-parking">No Parking Zone</option>
+                            <option value="paid">Paid Parking</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" rows="4" placeholder="Any additional details? (e.g., time restrictions, capacity, nearby landmarks)"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reported-by">Your Name</label>
+                        <input type="text" id="reported-by" placeholder="Anonymous" value="Anonymous">
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" onclick="showView('map')">Cancel</button>
+                        <button type="submit" class="btn-primary">Submit Spot</button>
+                    </div>
+                </form>
+
+                <div id="success-message" class="success-message" style="display: none;">
+                    <span class="success-icon">✓</span>
+                    <p>Parking spot added successfully! Thank you for contributing.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Map Picker Modal -->
+    <div id="map-picker-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📍 Select Location on Map</h3>
+                <button class="modal-close" onclick="closeMapPicker()">✕</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-instruction">Click anywhere on the map to select your parking spot location</p>
+                <div id="picker-map" class="picker-map-container"></div>
+                <div class="selected-location-info">
+                    <strong>Selected Location:</strong>
+                    <div id="picker-coordinates">Click on the map to select a location</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeMapPicker()">Cancel</button>
+                <button class="btn-primary" onclick="confirmLocation()" id="confirm-location-btn" disabled>Confirm Location</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 ParkFree - Community Parking Management</p>
+            <p class="footer-note">Made with ❤️ to help people avoid parking fines</p>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

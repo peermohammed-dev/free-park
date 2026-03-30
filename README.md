@@ -189,16 +189,9 @@ Free to use for educational purposes.
 **Data disappeared?**
 - Check if localStorage is enabled
 - Private browsing mode clears data
+- 
+## 📸 Screenshot
 
-## 📧 Support
+![freepark Screenshot](## 📸 Screenshot
 
-For questions about this project:
-1. Check the code comments
-2. Review this README
-3. Search online for specific technologies used
-
----
-
-**Made with ❤️ for educational purposes**
-
-Good luck with your project! 🎓
+![Zoya Screenshot](assets/screenshot.png))
